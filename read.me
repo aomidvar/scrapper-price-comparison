@@ -1,0 +1,51 @@
+# Spark Streaming Data Processing with Kafka and MongoDB
+
+This project demonstrates how to use Apache Spark for real-time streaming data processing. It reads data from a Kafka topic, performs windowing operations, calculates the minimum and maximum prices for different time windows, and writes the results to a new Kafka topic and a MongoDB database.
+
+## Prerequisites
+
+Before running the application, make sure you have the following components installed:
+
+- Docker and Docker Compose
+- Kafka cluster with the specified Kafka topics
+- MongoDB
+
+## Getting Started
+
+1. Clone the repository and navigate to the project directory.
+2. Update the `docker-compose.yml` file with the appropriate values:
+   - Replace `<your-spark-app-image>` with the image name and version/tag of your Spark application.
+   - Replace `<insert Kafka bootstrap servers>` with the bootstrap servers for your Kafka cluster.
+   - Replace `<insert KafkaTopicIN name>` with the name of the Kafka topic from which your Spark application reads the data.
+   - Replace `<insert KafkaTopicOUT name>` with the name of the Kafka topic to which your Spark application writes the "good price" messages.
+   - Replace `<insert MongoDB URI>` with the URI of your MongoDB database.
+3. Save the changes in the `docker-compose.yml` file.
+4. Build the Spark application image by running the following command:
+docker build -t <your-spark-app-image> .
+
+
+5. Start the services using Docker Compose:
+docker-compose up -d
+
+## Architecture
+
+The architecture of the Spark streaming data processing application can be summarized in the following steps:
+
+1. The Spark application reads data from the specified Kafka topic (`KafkaTopicIN`) using the configured Kafka parameters.
+2. The data is parsed and filtered to exclude any invalid messages.
+3. The stream of data is split into four separate streams based on different time windows (daily, monthly, yearly, and historical).
+4. For each window type, the stream is windowed using Spark's time-based windowing operations.
+5. The data within each window is aggregated to find the minimum and maximum prices for that window.
+6. The aggregated data for each window type is then passed through a function that compares the current price with the minimum and maximum prices for that window type. If the current price is within the range of the minimum and maximum prices, it is considered a "good price"; otherwise, it is considered a "bad price".
+7. The "good price" messages are written to a new Kafka topic (`KafkaTopicOUT`) in JSON format. This topic contains the same fields as the original Kafka topic, with an additional field indicating whether the price is good or bad.
+8. The "good price" messages are also written to a MongoDB database using the available API. The API accepts JSON messages and writes them to the database, along with a timestamp indicating when the message was received.
+
+## Notes
+
+- Make sure to replace the placeholder values in the `docker-compose.yml` file with the actual values for your setup.
+- Customize the Spark application code and schema according to your data requirements.
+- Ensure that the Kafka topics, MongoDB database, and Spark application are properly configured and accessible.
+
+---
+
+Feel free to modify and enhance this README file to suit your project's specific details. Once you're satisfied, you can publish it on GitHub to provide documentation and instructions for others to use and contribute to your project. Cheers!
